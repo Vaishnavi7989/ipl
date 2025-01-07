@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TeamRepository extends JpaRepository<Team, Integer> {
 
-    Optional<Team> findByTeamId(int teamId);
-    Optional<Team> findByTeamName(String teamName);
+    Team findByTeamId(int teamId);
+    Team findByTeamName(String teamName);
 }

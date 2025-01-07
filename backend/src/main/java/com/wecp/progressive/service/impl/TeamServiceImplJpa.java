@@ -1,30 +1,36 @@
 package com.wecp.progressive.service.impl;
+ 
+import java.sql.SQLException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.wecp.progressive.dao.TeamDAO;
 import com.wecp.progressive.entity.Team;
 import com.wecp.progressive.exception.TeamAlreadyExistsException;
 import com.wecp.progressive.exception.TeamDoesNotExistException;
 import com.wecp.progressive.repository.CricketerRepository;
 import com.wecp.progressive.repository.MatchRepository;
 import com.wecp.progressive.repository.TeamRepository;
+import com.wecp.progressive.repository.VoteRepository;
 import com.wecp.progressive.service.TeamService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.sql.SQLException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-
+ 
 @Service
 public class TeamServiceImplJpa  implements TeamService {
 
     private TeamRepository teamRepository;
 
     @Autowired
-    CricketerRepository cricketerRepository;
+    private CricketerRepository cricketerRepository;
 
     @Autowired
-    MatchRepository matchRepository;
+    private MatchRepository matchRepository;
+
+    @Autowired
+    private VoteRepository voteRepository;
 
     @Autowired
     public TeamServiceImplJpa(TeamRepository teamRepository) {
@@ -38,9 +44,9 @@ public class TeamServiceImplJpa  implements TeamService {
 
     @Override
     public int addTeam(Team team) throws SQLException {
-        Optional<Team> existingTeam = teamRepository.findByTeamName(team.getTeamName());
-        if (existingTeam.isPresent()) {
-            throw new TeamAlreadyExistsException("Team with name " + team.getTeamName() + " already exists.");
+
+        if(teamRepository.findByTeamName(team.getTeamName()) != null){
+            throw new TeamAlreadyExistsException("Team with same name exists");
         }
         return teamRepository.save(team).getTeamId();
     }
@@ -54,29 +60,23 @@ public class TeamServiceImplJpa  implements TeamService {
 
     @Override
     public Team getTeamById(int teamId) throws SQLException {
-        Optional<Team> existingTeam = teamRepository.findByTeamId(teamId);
-        if(!existingTeam.isPresent())
-        {
-            throw new TeamDoesNotExistException("team does not exist");
+        if(teamRepository.findByTeamId(teamId) == null){
+            throw new TeamDoesNotExistException("Team does not exist");
         }
-        return teamRepository.findByTeamId(teamId).get();
+        return teamRepository.findByTeamId(teamId);
     }
 
     @Override
     public void updateTeam(Team team) throws SQLException {
-        Optional<Team> existingTeam = teamRepository.findByTeamName(team.getTeamName());
-        if(existingTeam.isPresent())
-        {
-            throw new TeamAlreadyExistsException("team already exists");
+        if(teamRepository.findByTeamName(team.getTeamName()) != null){
+            throw new TeamAlreadyExistsException("Team with same name exists");
         }
-        else
-        {
-            teamRepository.save(team);
-        }
+        teamRepository.save(team);
     }
 
     @Override
     public void deleteTeam(int teamId) throws SQLException {
+        voteRepository.deleteByTeamId(teamId);
         matchRepository.deleteByTeamId(teamId);
         cricketerRepository.deleteByTeamId(teamId);
         teamRepository.deleteById(teamId);
