@@ -15,6 +15,7 @@ import com.wecp.progressive.exception.TeamDoesNotExistException;
 import com.wecp.progressive.repository.CricketerRepository;
 import com.wecp.progressive.repository.MatchRepository;
 import com.wecp.progressive.repository.TeamRepository;
+import com.wecp.progressive.repository.TicketBookingRepository;
 import com.wecp.progressive.repository.VoteRepository;
 import com.wecp.progressive.service.TeamService;
  
@@ -31,6 +32,9 @@ public class TeamServiceImplJpa  implements TeamService {
 
     @Autowired
     private VoteRepository voteRepository;
+
+      @Autowired
+    private TicketBookingRepository ticketBookingRepository;
 
     @Autowired
     public TeamServiceImplJpa(TeamRepository teamRepository) {
@@ -77,6 +81,7 @@ public class TeamServiceImplJpa  implements TeamService {
     @Override
     public void deleteTeam(int teamId) throws SQLException {
         voteRepository.deleteByTeamId(teamId);
+        ticketBookingRepository.deleteByTeamId(teamId);
         matchRepository.deleteByTeamId(teamId);
         cricketerRepository.deleteByTeamId(teamId);
         teamRepository.deleteById(teamId);
